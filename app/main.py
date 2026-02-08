@@ -93,34 +93,37 @@ def list_events(limit: int = 50, offset: int = 0, db: Session = Depends(get_db))
     ]
 
 # ---------------------------------------------------------
-# READ - get event ONLY if BOTH id and exnum match (required)
+# READ - get event by stid (user ID) and exnum
 # ---------------------------------------------------------
 @app.get("/v1/events/{event_id}", response_model=EventOut, dependencies=[Depends(require_api_key)])
 def get_event_by_id_and_exnum(
-    event_id: int,
+    event_id: str,
     exnum: str = Query(..., min_length=1),
     db: Session = Depends(get_db),
 ):
     """
     Call example:
-      GET /v1/events/12?exnum=EX1
+      GET /v1/events/student123?exnum=EX1
 
-    Returns 404 if:
-      - id doesn't exist, OR
-      - id exists but payload.exnum doesn't match the provided exnum
+    Returns the most recent event matching both stid and exnum.
+    Returns 404 if no matching event exists.
     """
-    e = db.get(Event, event_id)
-    if not e:
-        raise HTTPException(status_code=404, detail="Not found")
-
-    p = e.payload or {}
-    if not isinstance(p, dict) or p.get("exnum") != exnum:
-        # 404 to avoid leaking existence of IDs with different exnum
-        raise HTTPException(status_code=404, detail="Not found")
-
-    return EventOut(
-        id=e.id,
-        received_at=e.received_at.isoformat(),
-        source=e.source,
-        payload=e.payload,
+    # Query for events where payload.stid matches and payload.exnum matches
+    events = (
+        db.query(Event)
+        .order_by(desc(Event.id))
+        .all()
     )
+    
+    for e in events:
+        p = e.payload or {}
+        if isinstance(p, dict) and p.get("stid") == event_id and p.get("exnum") == exnum:
+            return EventOut(
+                id=e.id,
+                received_at=e.received_at.isoformat(),
+                source=e.source,
+                payload=e.payload,
+            )
+    
+    # 404 if no matching event found
+    raise HTTPException(status_code=404, detail="Not found")
