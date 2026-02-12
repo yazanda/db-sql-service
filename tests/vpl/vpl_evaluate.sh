@@ -55,7 +55,7 @@ echo "--- Exit code: $TEST_EXIT ---"
 # Use localhost or set API_URL environment variable for production
 # VPL_API_KEY should match the value configured in your deployment
 API_URL="${API_URL:-https://vpldbservice.jce.ac}"
-VPL_API_KEY="${VPL_API_KEY:-CHANGE_ME_TO_A_LONG_RANDOM_SECRET}"
+VPL_API_KEY="${VPL_API_KEY:-aJx3nOo9sKZfW7Rl5c4T}"
 
 RESPONSE=$(curl -s -w "\n%{http_code}" -X POST "${API_URL}/v1/events" \
   -H "X-API-Key: ${VPL_API_KEY}" \
