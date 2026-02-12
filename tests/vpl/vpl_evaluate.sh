@@ -34,9 +34,12 @@ echo "EX_ID=$EX_ID"
 TABLE_OUTPUT=""
 TEST_EXIT=0
 
-if [[ -f tester.py ]]; then
+# Get the directory where this script is located
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+if [[ -f "$SCRIPT_DIR/tester.py" ]]; then
   set +e
-  TABLE_OUTPUT="$(python3 tester.py 2>&1)"
+  TABLE_OUTPUT="$(python3 "$SCRIPT_DIR/tester.py" 2>&1)"
   TEST_EXIT=$?
   set -e
 else
@@ -51,7 +54,7 @@ echo "--- Exit code: $TEST_EXIT ---"
 # send output to the app via curl 
 # Use localhost or set API_URL environment variable for production
 # VPL_API_KEY should match the value configured in your deployment
-API_URL="${API_URL:-http://localhost}"
+API_URL="${API_URL:-https://vpldbservice.jce.ac}"
 VPL_API_KEY="${VPL_API_KEY:-CHANGE_ME_TO_A_LONG_RANDOM_SECRET}"
 
 RESPONSE=$(curl -s -w "\n%{http_code}" -X POST "${API_URL}/v1/events" \

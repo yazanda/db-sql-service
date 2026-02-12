@@ -6,7 +6,7 @@ API_KEY_NAME = "X-API-Key"
 api_key_header = APIKeyHeader(name=API_KEY_NAME, auto_error=False)
 
 def require_api_key(api_key: str = Security(api_key_header)) -> str:
-    expected = os.getenv("API_KEY", "")
+    expected = "CHANGE_ME_TO_A_LONG_RANDOM_SECRET"
     if not expected or api_key != expected:
         raise HTTPException(status_code=401, detail="Invalid or missing API key")
     return api_key
